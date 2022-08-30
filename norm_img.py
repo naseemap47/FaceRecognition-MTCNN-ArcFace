@@ -3,6 +3,7 @@ import glob
 import argparse
 import math
 from my_utils import alignment_procedure
+from retinaface import RetinaFace
 
 
 ap = argparse.ArgumentParser()
@@ -25,21 +26,23 @@ eye_detector = cv2.CascadeClassifier('haarcascade_eye.xml')
 
 img_list = glob.glob(path_to_dir + '/*')
 for img_path in img_list:
-    img = cv2.imread(img_path)
-    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # img = cv2.imread(img_path)
+    resp = RetinaFace.detect_faces(img_path)
+    
+    # else:
+    #     print(f'[INFO] Not detected Eyes in {img_path}')
+    print('resp: ', resp)
 
-    eyes = eye_detector.detectMultiScale(gray_img)
-    if len(eyes) != 0:
-        for (x, y, w, h) in eyes:
-            cv2.rectangle(
-                img, (x, y), (x+w, y+h),
-                (0, 255, 0), 2
-            )
-    else:
-        print(f'[INFO] Not detected Eyes in {img_path}')
-    print('eyes: ', eyes)
+    # right_eye = resp['face_1']['landmarks']['right_eye']
+    # left_eye = resp['face_1']['landmarks']['left_eye']
 
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
+    # right_eye = [int(x) for x in right_eye]
+    # left_eye = [int(x) for x in left_eye]
+
+    # cv2.circle(img, right_eye, 3, (0, 255, 0), 3)
+    # cv2.circle(img, left_eye, 3, (0, 255, 0), 3)
+
+    # cv2.imshow('img', img)
+    # cv2.waitKey(0)
 
     # norm_img = alignment_procedure(img, )
