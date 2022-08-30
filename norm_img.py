@@ -1,3 +1,4 @@
+import os
 import cv2
 import glob
 import argparse
@@ -29,20 +30,14 @@ for img_path in img_list:
         right_eye = detections[0]['keypoints']['right_eye']
         left_eye = detections[0]['keypoints']['left_eye']
         bbox = detections[0]['box']
-        norm_img = alignment_procedure(img, left_eye, right_eye, bbox)
+        norm_img_roi = alignment_procedure(img, left_eye, right_eye, bbox)
 
-        right_eye = [int(x) for x in right_eye]
-        left_eye = [int(x) for x in left_eye]
-
-        cv2.circle(img, right_eye, 3, (0, 255, 0), 3)
-        cv2.circle(img, left_eye, 3, (0, 255, 0), 3)
-
-        cv2.imshow('img', img)
-        cv2.imshow('img_norm', norm_img)
-        cv2.waitKey(0)
+        # Save Norm ROI
+        cv2.imwrite(f'{path_to_save}/{os.path.split(img_path)[1]}', norm_img_roi)
+        print(f'[INFO] Successfully Normalised {os.path.split(img_path)[1]}')
 
     else:
         print(f'[INFO] Not detected Eyes in {img_path}')
 
-    print('detections: ', detections)
-    
+print(f'[INFO] Successfully Normalised All {len(os.listdir(path_to_save))} Images\n')
+print(f'[INFO] Saved in {path_to_save}')
