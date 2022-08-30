@@ -1,14 +1,21 @@
+import os
 import cv2
 import argparse
 
 
 ap = argparse.ArgumentParser()
+ap.add_argument("-n", "--name", type=str, required=True,
+                help="name of the person")
 ap.add_argument("-o", "--save", type=str, required=True,
                 help="path to save dir")
 
 
 args = vars(ap.parse_args())
+name_of_person = args['name']
 path_to_save = args['save']
+
+os.makedirs((os.path.join(path_to_save, name_of_person)), exist_ok=True)
+path_to_save = os.path.join(path_to_save, name_of_person)
 
 face_classifier = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
