@@ -1,7 +1,7 @@
 from keras.models import load_model
 from mtcnn import MTCNN
 from my_utils import alignment_procedure
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import Normalizer
 import ArcFace
 import cv2
 import numpy as np
@@ -23,6 +23,12 @@ args = vars(ap.parse_args())
 # source = args["source"]
 path_saved_model = args["model"]
 # threshold = args["conf"]
+
+normalizer = Normalizer()
+dataframe = pd.read_csv('data.csv')
+x_data = dataframe.copy()
+y = x_data.pop('names')
+x_norm = normalizer.fit(x_data)
 
 # Load saved model
 face_rec_model = load_model(path_saved_model, compile=True)
@@ -60,9 +66,9 @@ while True:
 
             # Normalise
             x = data.values #returns a numpy array
-            min_max_scaler = MinMaxScaler()
-            x_scaled = min_max_scaler.fit_transform(x)
-            data = pd.DataFrame(x_scaled)
+            # min_max_scaler = MinMaxScaler()
+            x_normed = x_norm.transform(x)
+            data = pd.DataFrame(x_normed)
 
             predict = face_rec_model.predict(data)[0]
             print(predict)

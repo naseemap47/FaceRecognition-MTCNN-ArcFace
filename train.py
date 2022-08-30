@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import Normalizer
 
 
 
@@ -61,9 +61,9 @@ df = pd.DataFrame(x, columns=np.arange(512))
 
 # Normalise
 x = df.values #returns a numpy array
-min_max_scaler = MinMaxScaler()
-x_scaled = min_max_scaler.fit_transform(x)
-df = pd.DataFrame(x_scaled)
+normalizer = Normalizer()
+x_norm = normalizer.fit_transform(x)
+df = pd.DataFrame(x_norm)
 
 df['names'] = y
 # print(df)
