@@ -35,28 +35,30 @@ print('target_size: ', target_size)
 x = []
 y = []
 
-names = ['Naseem']
+names = os.listdir(path_to_dir)
+names = sorted(names)
 class_number = len(names)
 
-img_list = glob.glob(path_to_dir + '/*')
-img_list = sorted(img_list)
+for name in names:
+    img_list = glob.glob(os.path.join(path_to_dir, name) + '/*')
+    img_list = sorted(img_list)
 
-for img_path in img_list:
-    img = cv2.imread(img_path)
-    img_resize = cv2.resize(img, target_size)
-    img_resize = np.reshape(img_resize, (1, 112, 112, 3))
-    img_embedding = model.predict(img_resize)[0]
-    print(img_embedding)
-    x.append(img_embedding)
-    y.append(names[0])
+    for img_path in img_list:
+        img = cv2.imread(img_path)
+        img_resize = cv2.resize(img, target_size)
+        img_resize = np.reshape(img_resize, (1, 112, 112, 3))
+        img_embedding = model.predict(img_resize)[0]
+        
+        x.append(img_embedding)
+        y.append(name)
+        print(f'[INFO] Embedding {img_path}')
+    print(f'[INFO] Completed {name} Part')
+print('[INFO] Image Data Embedding Completed...')
 
-
-# x = [list(i) for i in x]
+# DataFrame
 df = pd.DataFrame(x, columns=np.arange(512))
 df['names'] = y
-print(df)
-# print(x)
-# print(y)
+# print(df)
 
 x = df.copy()
 y = x.pop('names')
