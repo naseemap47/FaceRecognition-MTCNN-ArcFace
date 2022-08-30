@@ -20,18 +20,34 @@ path_to_dir = args["dataset"]
 # path_to_txt = args['classes']
 path_to_save = args['save']
 
-
-eye_detector = cv2.CascadeClassifier('haarcascade_eye.xml') 
+detector = cv2.dnn.readNetFromCaffe("deploy.prototxt.txt", "res10_300x300_ssd_iter_140000.caffemodel")
+# eye_detector = cv2.CascadeClassifier('haarcascade_eye.xml') 
 
 
 img_list = glob.glob(path_to_dir + '/*')
 for img_path in img_list:
-    # img = cv2.imread(img_path)
-    resp = RetinaFace.detect_faces(img_path)
+    img = cv2.imread(img_path)
+
+    original_size = img.shape
+    target_size = (300, 300)
+    image = cv2.resize(img, target_size)
+
+    aspect_ratio_x = (original_size[1] / target_size[1])
+    aspect_ratio_y = (original_size[0] / target_size[0])
+    print("aspect ratios x: ",aspect_ratio_x,", y: ", aspect_ratio_y)
+
+    #detector expects (1, 3, 300, 300) shaped input
+    imageBlob = cv2.dnn.blobFromImage(image = image)
+
+    detector.setInput(imageBlob)
+    detections = detector.forward()
+
+    print('detections: ', detections)
+    # resp = RetinaFace.detect_faces(img_path)
     
     # else:
     #     print(f'[INFO] Not detected Eyes in {img_path}')
-    print('resp: ', resp)
+    # print('resp: ', resp)
 
     # right_eye = resp['face_1']['landmarks']['right_eye']
     # left_eye = resp['face_1']['landmarks']['left_eye']
@@ -45,4 +61,5 @@ for img_path in img_list:
     # cv2.imshow('img', img)
     # cv2.waitKey(0)
 
-    # norm_img = alignment_procedure(img, )
+    # norm_img = alignment_procedure(img, left_eye, right_eye)
+    
