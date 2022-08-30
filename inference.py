@@ -34,6 +34,8 @@ target_size = arcface_model.layers[0].input_shape[0][1:3]
 
 cap = cv2.VideoCapture(0)
 
+class_names = ['Aasish', 'Joel', 'Naseem']
+
 while True:
     success, img = cap.read()
     if not success:
@@ -55,10 +57,21 @@ while True:
 
             data = pd.DataFrame([img_embedding], columns=np.arange(512))
             predict = face_rec_model.predict(data)[0]
-
             print(predict)
+            # pose_class = class_names[predict.argmax()]
+
+            # Show Result
+            # img = cv2.putText(
+            #     img, f'{pose_class}',
+            #     (40, 50), cv2.FONT_HERSHEY_PLAIN,
+            #     2, (255, 0, 255), 2
+            # )
 
     else:
         print('[INFO] Eyes Not Detected!!')
 
-    
+    # cv2.imshow('Output Image', img)
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     cv2.destroyAllWindows()
+    #     break
+print('[INFO] Inference on Videostream is Ended...')
