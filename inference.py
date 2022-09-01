@@ -9,20 +9,27 @@ import pandas as pd
 import argparse
 
 
+######################
+class_names = [
+    'Naseem', 'Vikas'
+]
+######################
+
 ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--source", type=str, required=True,
+                help="path to Video or webcam")
 ap.add_argument("-m", "--model", type=str, required=True,
                 help="path to saved .h5 model, eg: dir/model.h5")
-# ap.add_argument("-c", "--conf", type=float, required=True,
-#                 help="min prediction conf to detect pose class (0<conf<1)")
-# ap.add_argument("-i", "--source", type=str, required=True,
-#                 help="path to sample image")
-
+ap.add_argument("-c", "--conf", type=float, default=0.9,
+                help="min prediction conf (0<conf<1)")
 
 args = vars(ap.parse_args())
-# source = args["source"]
+source = args["source"]
 path_saved_model = args["model"]
-# threshold = args["conf"]
+threshold = args["conf"]
 
+if source.isnumeric():
+    source = int(source)
 
 # Load saved FaceRecognition Model
 face_rec_model = load_model(path_saved_model, compile=True)
@@ -32,11 +39,10 @@ detector = MTCNN()
 
 # Load ArcFace Model
 arcface_model = ArcFace.loadModel()
-arcface_model.load_weights("arcface_weights.h5")
+# arcface_model.load_weights("arcface_weights.h5")
 target_size = arcface_model.layers[0].input_shape[0][1:3]
 
-cap = cv2.VideoCapture(2)
-class_names = ['Naseem', 'Vikas']
+cap = cv2.VideoCapture(source)
 
 while True:
     success, img = cap.read()
@@ -50,6 +56,8 @@ while True:
             right_eye = detect['keypoints']['right_eye']
             left_eye = detect['keypoints']['left_eye']
             bbox = detect['box']
+            xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), \
+                    int(bbox[2]+bbox[0]), int(bbox[3]+bbox[1])
             norm_img_roi = alignment_procedure(img, left_eye, right_eye, bbox)
 
             img_resize = cv2.resize(norm_img_roi, target_size)
@@ -62,13 +70,20 @@ while True:
             data = pd.DataFrame([img_embedding], columns=np.arange(512))
 
             predict = face_rec_model.predict(data)[0]
-            print(predict)
-            pose_class = class_names[predict.argmax()]
-
+            # print(predict)
+            if max(predict) > threshold:
+                pose_class = class_names[predict.argmax()]
+            else:
+                pose_class = 'Unkown Person'
+            
             # Show Result
-            img = cv2.putText(
+            cv2.rectangle(
+                img, (xmin, ymin), (xmax, ymax),
+                (0, 255, 0), 2
+            )
+            cv2.putText(
                 img, f'{pose_class}',
-                (40, 50), cv2.FONT_HERSHEY_PLAIN,
+                (xmin, ymin-10), cv2.FONT_HERSHEY_PLAIN,
                 2, (255, 0, 255), 2
             )
 
