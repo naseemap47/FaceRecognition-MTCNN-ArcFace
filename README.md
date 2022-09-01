@@ -35,7 +35,7 @@ In side save Dir, contain folder with name of people. Inside that, it contain co
 │   │   ├── 1.jpg
 │   │   ├── 2.jpg
 │   │   ├── ...
-│   ├── person_1
+│   ├── person_2
 │   │   ├── 1.jpg
 │   │   ├── 2.jpg
 │   │   ├── ...
@@ -59,7 +59,7 @@ python3 norm_img.py --dataset data/ --save norm_data
 │   │   ├── 1_norm.jpg
 │   │   ├── 2_norm.jpg
 │   │   ├── ...
-│   ├── person_1
+│   ├── person_2
 │   │   ├── 1_norm.jpg
 │   │   ├── 2_norm.jpg
 │   │   ├── ...
