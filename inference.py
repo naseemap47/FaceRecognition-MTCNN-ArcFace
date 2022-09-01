@@ -24,11 +24,11 @@ args = vars(ap.parse_args())
 path_saved_model = args["model"]
 # threshold = args["conf"]
 
-normalizer = Normalizer()
+# Normalise
 dataframe = pd.read_csv('data.csv')
 x_data = dataframe.copy()
 y = x_data.pop('names')
-x_norm = normalizer.fit(x_data)
+x_norm = Normalizer().fit(x_data)
 
 # Load saved model
 face_rec_model = load_model(path_saved_model, compile=True)
@@ -69,6 +69,7 @@ while True:
             # min_max_scaler = MinMaxScaler()
             x_normed = x_norm.transform(x)
             data = pd.DataFrame(x_normed)
+            data = data.astype('float64')
 
             predict = face_rec_model.predict(data)[0]
             print(predict)

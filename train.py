@@ -12,7 +12,6 @@ import pandas as pd
 from sklearn.preprocessing import Normalizer
 
 
-
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--dataset", type=str, required=True,
                 help="path to dataset/dir")
@@ -61,8 +60,9 @@ df = pd.DataFrame(x, columns=np.arange(512))
 
 # Normalise
 x = df.values #returns a numpy array
-normalizer = Normalizer()
-x_norm = normalizer.fit_transform(x)
+normalizer = Normalizer().fit(x)
+x_norm = normalizer.transform(x)
+
 df = pd.DataFrame(x_norm)
 
 df['names'] = y
