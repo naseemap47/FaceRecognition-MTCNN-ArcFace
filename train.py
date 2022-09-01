@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
-
+from tensorflow.keras.preprocessing import image
 
 
 ap = argparse.ArgumentParser()
@@ -23,15 +23,16 @@ args = vars(ap.parse_args())
 path_to_dir = args["dataset"]
 path_to_save = args['save']
 
-
+# Load ArcFace Model
 model = ArcFace.loadModel()
 model.load_weights("arcface_weights.h5")
-print("ArcFace expects ",model.layers[0].input_shape[0][1:]," inputs")
-print("and it represents faces as ", model.layers[-1].output_shape[1:]," dimensional vectors")
+print("ArcFace expects ", model.layers[0].input_shape[0][1:], " inputs")
+print("and it represents faces as ",
+      model.layers[-1].output_shape[1:], " dimensional vectors")
 target_size = model.layers[0].input_shape[0][1:3]
 print('target_size: ', target_size)
 
-
+# Variable for store img Embedding
 x = []
 y = []
 
@@ -46,9 +47,12 @@ for name in names:
     for img_path in img_list:
         img = cv2.imread(img_path)
         img_resize = cv2.resize(img, target_size)
-        img_resize = np.reshape(img_resize, (1, 112, 112, 3))
-        img_embedding = model.predict(img_resize)[0]
-        
+        # what this line doing? must?
+        img_pixels = image.img_to_array(img_resize)
+        img_pixels = np.expand_dims(img_pixels, axis=0)
+        img_norm = img_pixels/255  # normalize input in [0, 1]
+        img_embedding = model.predict(img_norm)[0]
+
         x.append(img_embedding)
         y.append(name)
         print(f'[INFO] Embedding {img_path}')
@@ -58,7 +62,6 @@ print('[INFO] Image Data Embedding Completed...')
 # DataFrame
 df = pd.DataFrame(x, columns=np.arange(512))
 df['names'] = y
-# print(df)
 
 x = df.copy()
 y = x.pop('names')
