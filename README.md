@@ -1,6 +1,10 @@
 # FaceRecognition-RetinaFace-ArcFace
 FaceRecognition with MTCNN using ArcFace
 
+<p align="center">
+  <img src='https://user-images.githubusercontent.com/88816150/187910639-ae68998b-5377-40b7-8faf-0206d05353ae.gif' alt="animated" />
+</p>
+
 ### Clone this Repository
 ```
 git clone https://github.com/naseemap47/FaceRecognition-MTCNN-ArcFace.git
