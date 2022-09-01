@@ -46,5 +46,5 @@ for name in class_list:
         else:
             print(f'[INFO] Not detected Eyes in {img_path}')
 
-    print(f'[INFO] Successfully Normalised All {len(os.listdir(path_to_save))} Images\n')
+    print(f'[INFO] Successfully Normalised All Images from {len(os.listdir(path_to_save))} Classes\n')
 print(f'[INFO] Normalised Images Saved in {path_to_save}')
