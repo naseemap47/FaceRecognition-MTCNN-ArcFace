@@ -96,10 +96,10 @@ python3 inference.py --source <path to video or webcam index> --model <path to m
 **Example:**
 ```
 # Video (mp4, avi ..)
-python3 inference_img.py --source test/video.mp4 --model model.h5 --conf 0.85
+python3 inference.py --source test/video.mp4 --model model.h5 --conf 0.85
 ```
 ```
 # Webcam
-python3 inference_img.py --source 0 --model model.h5 --conf 0.85
+python3 inference.py --source 0 --model model.h5 --conf 0.85
 ```
 **To Exit Window - Press Q-Key**
