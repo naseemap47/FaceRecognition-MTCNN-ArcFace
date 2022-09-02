@@ -1,4 +1,4 @@
-# FaceRecognition-RetinaFace-ArcFace
+# FaceRecognition-MTCNN-ArcFace
 FaceRecognition with MTCNN using ArcFace
 
 <p align="center">
