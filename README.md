@@ -16,7 +16,19 @@ cd FaceRecognition-MTCNN-ArcFace
 pip3 install -r requirement.txt
 ```
 
-## Custom Face Recognition
+# Custom Face Recognition
+You can use:<br> **Command Line<br> OR<br> Streamlit** Dashboard
+## Streamlit Dashboard
+### Install Streamlit
+```
+pip3 install streamlit
+```
+### RUN Streamlit
+```
+streamlit run app.py
+```
+
+## Command Line
 ### 1.Collect Data using Web-cam
 ```
 python3 take_imgs.py --name <name of person> --save <path to save dir>
