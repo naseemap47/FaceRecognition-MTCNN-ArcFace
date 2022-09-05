@@ -22,9 +22,9 @@ if not webcam_channel == 'Select Channel':
         if len(name_list)!= 0:
             for i in name_list:
                 if i == name_person:
-                    st.warning('The Name is Already Exist')
+                    st.warning('The Name is Already Exist!!')
                     break
-        os.makedirs(f'data/{name_person}', exist_ok=True)
+        os.mkdir(f'data/{name_person}')
         st.success(f'{name_person} added Successfully')
 
         if len(os.listdir(f'data/{name_person}'))==0:
