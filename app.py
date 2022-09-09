@@ -32,7 +32,7 @@ FRAME_WINDOW = st.image([])
 if not webcam_channel == 'Select Channel':
     take_img = st.button('Take Images')
     if take_img:
-        if len(name_list)!= 0:
+        if len(name_list) != 0:
             for i in name_list:
                 if i == name_person:
                     st.warning('The Name is Already Exist!!')
@@ -40,8 +40,9 @@ if not webcam_channel == 'Select Channel':
         os.mkdir(f'data/{name_person}')
         st.success(f'{name_person} added Successfully')
 
-        if len(os.listdir(f'data/{name_person}'))==0:
-            face_classifier = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+        if len(os.listdir(f'data/{name_person}')) == 0:
+            face_classifier = cv2.CascadeClassifier(
+                'haarcascade_frontalface_default.xml')
             cap = cv2.VideoCapture(int(webcam_channel))
             count = 0
             while True:
@@ -66,7 +67,7 @@ if not webcam_channel == 'Select Channel':
                 if count == img_number:
                     st.success(f'[INFO] Collected {img_number} Images')
                     break
-                
+
             FRAME_WINDOW.image([])
             cap.release()
             cv2.destroyAllWindows()
@@ -80,7 +81,7 @@ st.sidebar.title('Normalize Image Data')
 if st.sidebar.button('Normalize'):
     path_to_dir = "data"
     path_to_save = 'norm_data'
-            
+
     Flage = True
     detector = MTCNN()
 
@@ -88,7 +89,7 @@ if st.sidebar.button('Normalize'):
     if os.path.exists(path_to_save):
         class_list_save = os.listdir(path_to_save)
         class_list_dir = os.listdir(path_to_dir)
-        class_list_update =  list(set(class_list_dir)^set(class_list_save))
+        class_list_update = list(set(class_list_dir) ^ set(class_list_save))
     else:
         os.makedirs(path_to_save)
 
@@ -100,37 +101,40 @@ if st.sidebar.button('Normalize'):
     else:
         class_list = class_list_update
 
-
     if Flage:
         class_list = sorted(class_list)
         for name in class_list:
             st.success(f"[INFO] Class '{name}' Started Normalising")
             img_list = glob.glob(os.path.join(path_to_dir, name) + '/*')
-            
+
             # Create Save Folder
             save_folder = os.path.join(path_to_save, name)
             os.makedirs(save_folder, exist_ok=True)
-            
+
             for img_path in img_list:
                 img = cv2.imread(img_path)
 
                 detections = detector.detect_faces(img)
-                
-                if len(detections)>0:
+
+                if len(detections) > 0:
                     right_eye = detections[0]['keypoints']['right_eye']
                     left_eye = detections[0]['keypoints']['left_eye']
                     bbox = detections[0]['box']
-                    norm_img_roi = alignment_procedure(img, left_eye, right_eye, bbox)
+                    norm_img_roi = alignment_procedure(
+                        img, left_eye, right_eye, bbox)
 
                     # Save Norm ROI
-                    cv2.imwrite(f'{save_folder}/{os.path.split(img_path)[1]}', norm_img_roi)
+                    cv2.imwrite(
+                        f'{save_folder}/{os.path.split(img_path)[1]}', norm_img_roi)
                     # st.success(f'[INFO] Successfully Normalised {img_path}')
 
                 else:
                     st.warning(f'[INFO] Not detected Eyes in {img_path}')
 
-            st.success(f"[INFO] All Normalised Images from '{name}' Saved in '{path_to_save}'")
-        st.success(f'[INFO] Successfully Normalised All Images from {len(os.listdir(path_to_dir))} Classes\n')
+            st.success(
+                f"[INFO] All Normalised Images from '{name}' Saved in '{path_to_save}'")
+        st.success(
+            f'[INFO] Successfully Normalised All Images from {len(os.listdir(path_to_dir))} Classes\n')
 
     else:
         st.warning('[INFO] Already Normalized All Data..')
@@ -141,7 +145,7 @@ st.sidebar.title('Train Model')
 if st.sidebar.button('Train Model'):
     path_to_dir = "norm_data"
     path_to_save = 'model.h5'
-    
+
     # Load ArcFace Model
     model = ArcFace.loadModel()
     target_size = model.layers[0].input_shape[0][1:3]
@@ -206,12 +210,12 @@ if st.sidebar.button('Train Model'):
     # validation accuracy.
     checkpoint_path = path_to_save
     checkpoint = keras.callbacks.ModelCheckpoint(checkpoint_path,
-                                                monitor='val_accuracy',
-                                                verbose=1,
-                                                save_best_only=True,
-                                                mode='max')
+                                                 monitor='val_accuracy',
+                                                 verbose=1,
+                                                 save_best_only=True,
+                                                 mode='max')
     earlystopping = keras.callbacks.EarlyStopping(monitor='val_accuracy',
-                                                patience=20)
+                                                  patience=20)
 
     st.success('[INFO] Model Training Started ...')
     # Start training
@@ -273,7 +277,7 @@ if st.sidebar.button('Run/Stop'):
         target_size = arcface_model.layers[0].input_shape[0][1:3]
         # Load saved FaceRecognition Model
         face_rec_model = load_model(path_saved_model, compile=True)
-        
+
         while True:
             success, img = cap.read()
             if not success:
@@ -287,8 +291,9 @@ if st.sidebar.button('Run/Stop'):
                     left_eye = detect['keypoints']['left_eye']
                     bbox = detect['box']
                     xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), \
-                            int(bbox[2]+bbox[0]), int(bbox[3]+bbox[1])
-                    norm_img_roi = alignment_procedure(img, left_eye, right_eye, bbox)
+                        int(bbox[2]+bbox[0]), int(bbox[3]+bbox[1])
+                    norm_img_roi = alignment_procedure(
+                        img, left_eye, right_eye, bbox)
 
                     img_resize = cv2.resize(norm_img_roi, target_size)
                     # what this line doing? must?
@@ -297,7 +302,8 @@ if st.sidebar.button('Run/Stop'):
                     img_norm = img_pixels/255  # normalize input in [0, 1]
                     img_embedding = arcface_model.predict(img_norm)[0]
 
-                    data = pd.DataFrame([img_embedding], columns=np.arange(512))
+                    data = pd.DataFrame(
+                        [img_embedding], columns=np.arange(512))
 
                     predict = face_rec_model.predict(data)[0]
                     # print(predict)
@@ -305,7 +311,7 @@ if st.sidebar.button('Run/Stop'):
                         pose_class = class_names[predict.argmax()]
                     else:
                         pose_class = 'Unkown Person'
-                    
+
                     # Show Result
                     cv2.rectangle(
                         img, (xmin, ymin), (xmax, ymax),
@@ -321,7 +327,7 @@ if st.sidebar.button('Run/Stop'):
                 st.warning('[INFO] Eyes Not Detected!!')
 
             FRAME_WINDOW.image(img, channels='BGR')
-        
+
         FRAME_WINDOW.image([])
         st.success('[INFO] Inference on Videostream is Ended...')
 
