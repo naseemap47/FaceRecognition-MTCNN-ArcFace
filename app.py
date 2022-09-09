@@ -1,6 +1,9 @@
 import streamlit as st
 import cv2
 import os
+from my_utils import alignment_procedure
+from mtcnn import MTCNN
+import glob
 
 
 st.title('Face Recognition System')
@@ -57,3 +60,64 @@ if not webcam_channel == 'Select Channel':
             FRAME_WINDOW.image([])
             cap.release()
             cv2.destroyAllWindows()
+
+    # 2nd Stage - Normalize Image Data
+    st.sidebar.text('Go to Next Stage:')
+    if st.sidebar.button('Completed', help='If Data Collection Completed'):
+        path_to_dir = "data"
+        path_to_save = 'norm_data'
+              
+        Flage = True
+        detector = MTCNN()
+
+        class_list_update = []
+        if os.path.exists(path_to_save):
+            class_list_save = os.listdir(path_to_save)
+            class_list_dir = os.listdir(path_to_dir)
+            class_list_update =  list(set(class_list_dir)^set(class_list_save))
+        else:
+            os.makedirs(path_to_save)
+
+        if len(class_list_update) == 0:
+            if (set(class_list_dir) == set(class_list_save)):
+                Flage = False
+            else:
+                class_list = os.listdir(path_to_dir)
+        else:
+            class_list = class_list_update
+
+
+        if Flage:
+            class_list = sorted(class_list)
+            for name in class_list:
+                st.success(f"[INFO] Class '{name}' Started Normalising")
+                img_list = glob.glob(os.path.join(path_to_dir, name) + '/*')
+                
+                # Create Save Folder
+                save_folder = os.path.join(path_to_save, name)
+                os.makedirs(save_folder, exist_ok=True)
+                
+                for img_path in img_list:
+                    img = cv2.imread(img_path)
+
+                    detections = detector.detect_faces(img)
+                    
+                    if len(detections)>0:
+                        right_eye = detections[0]['keypoints']['right_eye']
+                        left_eye = detections[0]['keypoints']['left_eye']
+                        bbox = detections[0]['box']
+                        norm_img_roi = alignment_procedure(img, left_eye, right_eye, bbox)
+
+                        # Save Norm ROI
+                        cv2.imwrite(f'{save_folder}/{os.path.split(img_path)[1]}', norm_img_roi)
+                        # st.success(f'[INFO] Successfully Normalised {img_path}')
+
+                    else:
+                        st.warning(f'[INFO] Not detected Eyes in {img_path}')
+
+                st.success(f"[INFO] All Normalised Images from '{name}' Saved in '{path_to_save}'")
+            st.success(f'[INFO] Successfully Normalised All Images from {len(os.listdir(path_to_dir))} Classes\n')
+
+        else:
+            st.warning('[INFO] Already Normalized All Data..')
+
