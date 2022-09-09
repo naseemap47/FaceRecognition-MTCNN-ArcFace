@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import pandas as pd
 from tensorflow.keras.preprocessing import image
+from keras.models import load_model
 
 
 st.title('Face Recognition System')
@@ -19,7 +20,7 @@ os.makedirs('data', exist_ok=True)
 name_list = os.listdir('data')
 
 # Data Collection
-st.sidebar.title('Data Collection')
+# st.sidebar.title('Data Collection')
 webcam_channel = st.sidebar.selectbox(
     'Webcam Channel:',
     ('Select Channel', '0', '1', '2', '3')
@@ -69,6 +70,9 @@ if not webcam_channel == 'Select Channel':
             FRAME_WINDOW.image([])
             cap.release()
             cv2.destroyAllWindows()
+
+else:
+    st.warning('[INFO] Select Camera Channel')
 
 
 # 2nd Stage - Normalize Image Data
@@ -250,4 +254,76 @@ if st.sidebar.button('Train Model'):
         plt.savefig('metrics.png', bbox_inches='tight')
     st.success('[INFO] Successfully Saved metrics.png')
 
-    
+
+# 4th Stage - Inference
+st.sidebar.title('Inference')
+# Confidence
+threshold = st.sidebar.slider('Model Confidence:', 0.01, 0.99, 0.6)
+
+if st.sidebar.button('Run/Stop'):
+    class_names = os.listdir('data')
+    class_names = sorted(class_names)
+
+    if not webcam_channel == 'Select Channel':
+        path_saved_model = "model.h5"
+        cap = cv2.VideoCapture(int(webcam_channel))
+        # Load MTCNN
+        detector = MTCNN()
+        arcface_model = ArcFace.loadModel()
+        target_size = arcface_model.layers[0].input_shape[0][1:3]
+        # Load saved FaceRecognition Model
+        face_rec_model = load_model(path_saved_model, compile=True)
+        
+        while True:
+            success, img = cap.read()
+            if not success:
+                st.warning('[INFO] Error with Camera')
+                break
+
+            detections = detector.detect_faces(img)
+            if len(detections) > 0:
+                for detect in detections:
+                    right_eye = detect['keypoints']['right_eye']
+                    left_eye = detect['keypoints']['left_eye']
+                    bbox = detect['box']
+                    xmin, ymin, xmax, ymax = int(bbox[0]), int(bbox[1]), \
+                            int(bbox[2]+bbox[0]), int(bbox[3]+bbox[1])
+                    norm_img_roi = alignment_procedure(img, left_eye, right_eye, bbox)
+
+                    img_resize = cv2.resize(norm_img_roi, target_size)
+                    # what this line doing? must?
+                    img_pixels = image.img_to_array(img_resize)
+                    img_pixels = np.expand_dims(img_pixels, axis=0)
+                    img_norm = img_pixels/255  # normalize input in [0, 1]
+                    img_embedding = arcface_model.predict(img_norm)[0]
+
+                    data = pd.DataFrame([img_embedding], columns=np.arange(512))
+
+                    predict = face_rec_model.predict(data)[0]
+                    # print(predict)
+                    if max(predict) > threshold:
+                        pose_class = class_names[predict.argmax()]
+                    else:
+                        pose_class = 'Unkown Person'
+                    
+                    # Show Result
+                    cv2.rectangle(
+                        img, (xmin, ymin), (xmax, ymax),
+                        (0, 255, 0), 2
+                    )
+                    cv2.putText(
+                        img, f'{pose_class}',
+                        (xmin, ymin-10), cv2.FONT_HERSHEY_PLAIN,
+                        2, (255, 0, 255), 2
+                    )
+
+            else:
+                st.warning('[INFO] Eyes Not Detected!!')
+
+            FRAME_WINDOW.image(img, channels='BGR')
+        
+        FRAME_WINDOW.image([])
+        st.success('[INFO] Inference on Videostream is Ended...')
+
+    else:
+        st.warning('[INFO] Select Camera Channel')
