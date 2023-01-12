@@ -2,13 +2,9 @@ import cv2
 import os
 
 
-path_to_img_dir = 'Liveness/data'
+path_to_img_dir = 'Liveness/cam'
+path_to_img_save = 'Liveness/data'
 min_confidence = 0.5
-
-# Norm Save Dir
-os.makedirs(path_to_img_dir, exist_ok=True)
-os.makedirs(path_to_img_dir+'/positive', exist_ok=True)
-os.makedirs(path_to_img_dir+'/negative', exist_ok=True)
 
 
 opencv_dnn_model = cv2.dnn.readNetFromCaffe(
@@ -41,9 +37,10 @@ for class_dir in os.listdir(path_to_img_dir):
                 img_roi = img[y1:y2, x1:x2]
                 
                 # Save ROI
-                path_to_save = os.path.join(path_to_img_dir, )
-                cv2.imwrite(f'')
+                path_to_save = os.path.join(path_to_img_save, class_dir, img_path)
+                cv2.imwrite(path_to_save, img_roi)
+                print(f'[INFO] {path_to_save} Saved Successfully')
 
-                cv2.imshow('roi', img_roi)
-                if cv2.waitKey(0) & 0xFF == ord('q'):
-                    continue
+                # cv2.imshow('roi', img_roi)
+                # if cv2.waitKey(0) & 0xFF == ord('q'):
+                #     continue
