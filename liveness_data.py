@@ -11,7 +11,7 @@ ap.add_argument("-n", "--name", type=str, required=True,
 
 args = vars(ap.parse_args())
 name_of_person = args['name']
-path_to_save = 'Liveness'
+path_to_save = 'Liveness/cam'
 
 os.makedirs((os.path.join(path_to_save, name_of_person)), exist_ok=True)
 path_to_save_dir = os.path.join(path_to_save, name_of_person)
