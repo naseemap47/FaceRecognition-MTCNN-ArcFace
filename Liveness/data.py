@@ -4,21 +4,30 @@ import argparse
 
 
 ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--source", type=str, required=True,
+                help="source - Video path or camera-id")
 ap.add_argument("-n", "--name", type=str, required=True,
                 choices=['positive', 'negative'],
-                help="name of the person")
+                help="poitive or negative")
                 
 
 args = vars(ap.parse_args())
 name_of_person = args['name']
-path_to_save = 'Liveness/cam'
+path_to_vid = args['source']
+min_confidence = 0.6
 
-os.makedirs((os.path.join(path_to_save, name_of_person)), exist_ok=True)
-path_to_save_dir = os.path.join(path_to_save, name_of_person)
+path_to_save_dir = os.path.join('cam', name_of_person)
+os.makedirs(path_to_save_dir, exist_ok=True)
 
-face_classifier = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+# Face Detetcion - Caffe Model
+opencv_dnn_model = cv2.dnn.readNetFromCaffe(prototxt="../models/deploy.prototxt",
+                                            caffeModel="../models/res10_300x300_ssd_iter_140000_fp16.caffemodel")
 
-cap = cv2.VideoCapture(0)
+
+if path_to_vid.isnumeric():
+    path_to_vid = int(path_to_vid)
+
+cap = cv2.VideoCapture(path_to_vid)
 count = 0
 
 while True:
@@ -27,6 +36,7 @@ while True:
         print('[INFO] Cam NOT working!!')
         break
     
+    h, w, _ = img.shape
     img_name = len(os.listdir(path_to_save_dir))
     
     # Save Image
@@ -35,13 +45,27 @@ while True:
         print(f'[INFO] Successfully Saved {img_name}.jpg')
     count += 1
 
-    faces = face_classifier.detectMultiScale(img)
+    # Face Detection - Caffe Model
+    preprocessed_image = cv2.dnn.blobFromImage(img, scalefactor=1.0, size=(300, 300),
+                                               mean=(104.0, 117.0, 123.0), swapRB=False, crop=False)
+    
+    opencv_dnn_model.setInput(preprocessed_image)
+    results = opencv_dnn_model.forward()
 
-    for (x, y, w, h) in faces:
-        cv2.rectangle(
-            img, (x, y), (x+w, y+h),
-            (0, 255, 0), 2
-        )
+    for face in results[0][0]:
+        face_confidence = face[2]
+        if face_confidence > min_confidence:
+            bbox = face[3:]
+
+            x1 = int(bbox[0] * w)
+            y1 = int(bbox[1] * h)
+            x2 = int(bbox[2] * w)
+            y2 = int(bbox[3] * h)
+
+            cv2.rectangle(
+                img, (x1, y1), (x2, y2),
+                (0, 255, 0), w//200
+            )
 
     cv2.imshow('Webcam', img)
     if cv2.waitKey(1) & 0xFF==ord('q'):
