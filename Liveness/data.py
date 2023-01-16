@@ -12,11 +12,11 @@ ap.add_argument("-n", "--name", type=str, required=True,
                 
 
 args = vars(ap.parse_args())
-name_of_person = args['name']
+class_name = args['name']
 path_to_vid = args['source']
 min_confidence = 0.6
 
-path_to_save_dir = os.path.join('cam', name_of_person)
+path_to_save_dir = os.path.join('data', class_name)
 os.makedirs(path_to_save_dir, exist_ok=True)
 
 # Face Detetcion - Caffe Model
@@ -35,16 +35,9 @@ while True:
     if not success:
         print('[INFO] Cam NOT working!!')
         break
-    
-    h, w, _ = img.shape
-    img_name = len(os.listdir(path_to_save_dir))
-    
-    # Save Image
-    if count % 5 == 0:
-        cv2.imwrite(f'{path_to_save_dir}/{img_name}.jpg', img)
-        print(f'[INFO] Successfully Saved {img_name}.jpg')
-    count += 1
 
+    h, w, _ = img.shape
+    
     # Face Detection - Caffe Model
     preprocessed_image = cv2.dnn.blobFromImage(img, scalefactor=1.0, size=(300, 300),
                                                mean=(104.0, 117.0, 123.0), swapRB=False, crop=False)
@@ -62,13 +55,25 @@ while True:
             x2 = int(bbox[2] * w)
             y2 = int(bbox[3] * h)
 
+            # ROI
+            img_roi = img[y1:y2, x1:x2]
+            
+            # Save ROI
+            img_name = len(os.listdir(path_to_save_dir)) + 1
+            path_to_save = os.path.join(path_to_save_dir, str(img_name)) + '.jpg'
+            if count % 5 == 0:
+                cv2.imwrite(path_to_save, img_roi)
+                print(f'[INFO] {path_to_save} Saved Successfully')
+            
+            # Draw Rectangle
             cv2.rectangle(
                 img, (x1, y1), (x2, y2),
                 (0, 255, 0), w//200
             )
+            count += 1
 
     cv2.imshow('Webcam', img)
     if cv2.waitKey(1) & 0xFF==ord('q'):
-        print(f'[INFO] Collected Image {name_of_person} Data')
+        print(f'[INFO] Collected Image {class_name} Data')
         cv2.destroyAllWindows()
         break
