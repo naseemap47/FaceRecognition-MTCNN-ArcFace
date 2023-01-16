@@ -64,10 +64,13 @@ labels = tf.keras.utils.to_categorical(labels, 2)
 	test_size=0.25, random_state=42)
 
 # Data Augmentation
-aug = tf.keras.preprocessing.image.ImageDataGenerator(rotation_range=20, zoom_range=0.15,
+aug = tf.keras.preprocessing.image.ImageDataGenerator(
+	rotation_range=20, zoom_range=0.15,
 	width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15,
-	horizontal_flip=True, fill_mode="nearest")
+	horizontal_flip=True, fill_mode="nearest"
+)
 
+# Model Compiling
 print("[INFO] compiling model...")
 opt = tf.keras.optimizers.Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS)
 model = LivenessNet.build(width=32, height=32, depth=3,
@@ -75,21 +78,23 @@ model = LivenessNet.build(width=32, height=32, depth=3,
 model.compile(loss="binary_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
-# train the network
+# Train the network
 print("[INFO] training network for {} epochs...".format(EPOCHS))
 H = model.fit(x=aug.flow(trainX, trainY, batch_size=BS),
 	validation_data=(testX, testY), steps_per_epoch=len(trainX) // BS,
 	epochs=EPOCHS)
 
-# evaluate the network
+# Evaluate the network
 print("[INFO] evaluating network...")
 predictions = model.predict(x=testX, batch_size=BS)
-print(classification_report(testY.argmax(axis=1),
-	predictions.argmax(axis=1), target_names=le.classes_))
+print(classification_report(
+	testY.argmax(axis=1),
+	predictions.argmax(axis=1), target_names=le.classes_
+))
 
 # Save Model
-print("[INFO] serializing network to '{}'...".format('liveness.model'))
-model.save('liveness.model', save_format="h5")
+model.save('../models/liveness.model', save_format="h5")
+print("[INFO] Model Saved in '{}'".format('../models/liveness.model'))
 
 # save label encoder
 # f = open(args["le"], "wb")
