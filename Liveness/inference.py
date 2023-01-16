@@ -7,7 +7,7 @@ import argparse
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-m", "--model", type=str, default='liveness.model',
+ap.add_argument("-m", "--model", type=str, default='../models/liveness.model',
 	help="path to trained model")
 ap.add_argument("-i", "--source", type=str, required=True,
                 help="source - Video path or camera-id")
@@ -20,6 +20,7 @@ opencv_dnn_model = cv2.dnn.readNetFromCaffe(prototxt="../models/deploy.prototxt"
                                             caffeModel="../models/res10_300x300_ssd_iter_140000_fp16.caffemodel")
 
 # Load Saved Model
+print(f"[INFO] Loading Liveness Model from {args['model']}")
 model = tf.keras.models.load_model(args['model'])
 # le = pickle.loads(open('le.pickle', "rb").read())
 class_names = ['Negative', 'Positive']
