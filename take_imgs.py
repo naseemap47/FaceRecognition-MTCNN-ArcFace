@@ -42,6 +42,14 @@ while True:
         print('[INFO] Cam NOT working!!')
         break
 
+    # Save Image
+    if count % int(fps/5) == 0:
+        img_name = len(os.listdir(path_to_save))
+        cv2.imwrite(f'{path_to_save}/{img_name}.jpg', img)
+        print(f'[INFO] Successfully Saved {img_name}.jpg')
+    count += 1
+
+    # Caffe Model - Face Detection
     h, w, _ = img.shape
     preprocessed_image = cv2.dnn.blobFromImage(
         img, scalefactor=1.0, size=(300, 300),
@@ -58,14 +66,6 @@ while True:
             y1 = int(bbox[1] * h)
             x2 = int(bbox[2] * w)
             y2 = int(bbox[3] * h)
-
-            # Save Image
-            if count % int(fps/5) == 0:
-                img_name = len(os.listdir(path_to_save))
-                img_roi = img[y1:y2, x1:x2]
-                cv2.imwrite(f'{path_to_save}/{img_name}.jpg', img_roi)
-                print(f'[INFO] Successfully Saved {img_name}.jpg')
-            count += 1
 
             cv2.rectangle(
                 img, pt1=(x1, y1), pt2=(x2, y2),
