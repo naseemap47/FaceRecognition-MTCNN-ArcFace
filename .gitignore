@@ -129,8 +129,8 @@ dmypy.json
 .pyre/
 
 # Data Folder
-data/
-norm_data/
+Data/
+Norm/
 Liveness/data
 
 # Models
