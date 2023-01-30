@@ -11,7 +11,7 @@ from keras import layers, Sequential
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import pandas as pd
-from tensorflow.keras.preprocessing import image
+import tensorflow as tf
 from keras.models import load_model
 
 
@@ -167,7 +167,7 @@ if st.sidebar.button('Train Model'):
             img = cv2.imread(img_path)
             img_resize = cv2.resize(img, target_size)
             # what this line doing? must?
-            img_pixels = image.img_to_array(img_resize)
+            img_pixels = tf.keras.preprocessing.image.img_to_array(img_resize)
             img_pixels = np.expand_dims(img_pixels, axis=0)
             img_norm = img_pixels/255  # normalize input in [0, 1]
             img_embedding = model.predict(img_norm)[0]
@@ -297,7 +297,7 @@ if st.sidebar.button('Run/Stop'):
 
                     img_resize = cv2.resize(norm_img_roi, target_size)
                     # what this line doing? must?
-                    img_pixels = image.img_to_array(img_resize)
+                    img_pixels = tf.keras.preprocessing.image.img_to_array(img_resize)
                     img_pixels = np.expand_dims(img_pixels, axis=0)
                     img_norm = img_pixels/255  # normalize input in [0, 1]
                     img_embedding = arcface_model.predict(img_norm)[0]
