@@ -129,6 +129,11 @@ dmypy.json
 .pyre/
 
 # Data Folder
-data/
-norm_data/
-Liveness/cam
+Data/
+Norm/
+Liveness/data
+
+# Models
+*.h5
+# Label Encoder
+*.pickle

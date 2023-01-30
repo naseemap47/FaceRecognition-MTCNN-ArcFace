@@ -12,7 +12,7 @@ ap.add_argument("-m", "--model", type=str, default='../models/liveness.model',
 ap.add_argument("-i", "--source", type=str, required=True,
                 help="source - Video path or camera-id")
 ap.add_argument("-c", "--conf", type=str, default=0.8,
-                help="source - Video path or camera-id")
+                help="min prediction conf (0<conf<1)")
 args = vars(ap.parse_args())
 
 # Face Detection Caffe Model

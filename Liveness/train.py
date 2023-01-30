@@ -18,12 +18,8 @@ import os
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-d", "--dataset", required=True,
+ap.add_argument("-d", "--dataset", type=str, default='data',
 	help="path to input dataset")
-# ap.add_argument("-m", "--model", type=str, required=True,
-# 	help="path to trained model")
-# ap.add_argument("-l", "--le", type=str, required=True,
-# 	help="path to label encoder")
 ap.add_argument("-p", "--plot", type=str, default="plot.png",
 	help="path to output loss/accuracy plot")
 ap.add_argument("-lr", "--learnig_rate", type=float, default=0.0004,
@@ -95,11 +91,6 @@ print(classification_report(
 # Save Model
 model.save('../models/liveness.model', save_format="h5")
 print("[INFO] Model Saved in '{}'".format('../models/liveness.model'))
-
-# save label encoder
-# f = open(args["le"], "wb")
-# f.write(pickle.dumps(le))
-# f.close()
 
 # plot the training loss and accuracy
 plt.style.use("ggplot")

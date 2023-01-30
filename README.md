@@ -5,6 +5,13 @@ FaceRecognition with MTCNN using ArcFace
   <img src='https://user-images.githubusercontent.com/88816150/187910639-ae68998b-5377-40b7-8faf-0206d05353ae.gif' alt="animated" />
 </p>
 
+## 🚀 New Update (27-01-2023)
+- ### Liveness Model:
+  - Liveness detector capable of spotting fake faces and performing anti-face spoofing in face recognition systems
+  - Our FaceRecognition system initially will check the faces are **Fake** or **NOT**
+  - If its a Fake face it will give warnings
+  - Otherwise it will go for Face-Recognition
+
 ### Clone this Repository
 ```
 git clone https://github.com/naseemap47/FaceRecognition-MTCNN-ArcFace.git
@@ -17,25 +24,34 @@ pip3 install -r requirement.txt
 ```
 
 # Custom Face Recognition
-You can use:<br> **Command Line<br> OR<br> Streamlit** Dashboard
+You can use:<br>
+- ### Command Line <br>
+- ### Streamlit Dashboard
+
 ## Streamlit Dashboard
-### Install Streamlit
-```
-pip3 install streamlit
-```
+⚠️ New version NOT Available, Not updated **Liveness Model**
 ### RUN Streamlit
 ```
 streamlit run app.py
 ```
 
-## Command Line
-### 1.Collect Data using Web-cam
-```
-python3 take_imgs.py --name <name of person> --save <path to save dir>
-```
+## Command Line (Recommended)
+### 1.Collect Data using Web-cam or RTSP
+
+<details>
+  <summary>Args</summary>
+  
+  `-i`, `--source`: RTSP link or webcam-id <br>
+  `-n`, `--name`: name of the person <br>
+  `-o`, `--save`: path to save dir <br>
+  `-c`, `--conf`: min prediction conf (0<conf<1) <br>
+  `-x`, `--number`: number of data wants to collect
+
+</details>
+
 **Example:**
 ```
-python3 take_imgs.py --name JoneSnow --save data
+python3 take_imgs.py --source 0 --name JoneSnow --save data --conf 0.8 --number 100
 ```
 :book: **Note:** <br>
 Repeate this process for all people, that we need to detect on CCTV, Web-cam or in Video.<br>
@@ -57,9 +73,15 @@ In side save Dir, contain folder with name of people. Inside that, it contain co
 
 ### 2.Normalize Collected Data
 It will Normalize all data inside path to save Dir and save same as like Data Collected Dir
-```
-python3 norm_img.py --dataset <path to collected data> --save <path to save Dir>
-```
+
+<details>
+  <summary>Args</summary>
+  
+  `-i`, `--dataset`: path to dataset/dir <br>
+  `-o`, `--save`: path to save dir
+
+</details>
+
 **Example:**
 ```
 python3 norm_img.py --dataset data/ --save norm_data
@@ -79,39 +101,116 @@ python3 norm_img.py --dataset data/ --save norm_data
 .   .
 ```
 ### 3.Train a Model using Normalized Data
-```
-python3 train.py --dataset <path to normalized Data> --save <path to save model.h5>
-```
+
+<details>
+  <summary>Args</summary>
+  
+  `-i`, `--dataset`: path to Norm/dir <br>
+  `-o`, `--save`: path to save .h5 model, eg: dir/model.h5 <br>
+  `-l`, `--le`: path to label encoder <br>
+  `-b`, `--batch_size`: batch Size for model training <br>
+  `-e`, `--epochs`: Epochs for Model Training
+
+</details>
+
 **Example:**
 ```
-python3 train.py --dataset norm_data/ --save model.h5
+python3 train.py --dataset norm_data/ --batch_size 16 --epochs 100
 ```
 
 ## Inference
-### :book: Note: <br>
-Open **inference_img.py** and **inference.py**:- <br>
-Change **class_names** List into your class names. **Don't** forget to give in same order used for Training the Model. 
+
+<details>
+  <summary>Args</summary>
+  
+  `-i`, `--source`: path to Video or webcam or image <br>
+  `-m`, `--model`: path to saved .h5 model, eg: dir/model.h5 <br>
+  `-c`, `--conf`: min prediction conf (0<conf<1) <br>
+  `-lm`, `--liveness_model`: path to **liveness.model** <br>
+  `--le`, `--label_encoder`: path to label encoder
+
+</details>
+
 ### On Image 
-```
-python3 inference_img.py --image <path to image> --model <path to model.h5> --conf <min model prediction confidence>
-```
 **Example:**
 ```
-python3 inference_img.py --image data/JoneSnow/54.jpg --model model.h5 --conf 0.85
+python3 inference_img.py --source test/image.jpg --model models/model.h5 --conf 0.85 \
+                     --liveness_model models/liveness.model --label_encoder models/le.pickle
 ```
 **To Exit Window - Press Q-Key**
 
 ### On Video or Webcam
-```
-python3 inference.py --source <path to video or webcam index> --model <path to model.h5> --conf <min prediction confi>
-```
 **Example:**
 ```
 # Video (mp4, avi ..)
-python3 inference.py --source test/video.mp4 --model model.h5 --conf 0.85
+python3 inference.py --source test/video.mp4 --model models/model.h5 --conf 0.85 \
+                     --liveness_model models/liveness.model --label_encoder models/le.pickle
 ```
 ```
 # Webcam
-python3 inference.py --source 0 --model model.h5 --conf 0.85
+python3 inference.py --source 0 --model models/model.h5 --conf 0.85 \
+                     --liveness_model models/liveness.model --label_encoder models/le.pickle
+```
+**To Exit Window - Press Q-Key**
+
+## 🚀 Liveness Model
+Liveness detector capable of spotting fake faces and performing anti-face spoofing in face recognition systems <br>
+If you wants to create a custom **Liveness model**,
+Follow the instruction below 👇:
+
+### Data Collection
+Collect Positive and Negative data using data.py
+
+<details>
+  <summary>Args</summary>
+  
+  `-i`, `--source`: source - Video path or camera-id <br>
+  `-n`, `--name`: poitive or negative
+
+</details>
+
+**Example:**
+```
+cd Liveness
+python3 data.py --source 0 --name positive  # for positive
+python3 data.py --source 0 --name negative  # for negative
+```
+
+### Train Liveness Model
+Train Liveness model using collected positive and negative data
+
+<details>
+  <summary>Args</summary>
+  
+  `-d`, `--dataset`: path to input dataset <br>
+  `-p`, `--plot`: path to output loss/accuracy plot <br>
+  `-lr`, `--learnig_rate`: Learnig Rate for the Model Training <br>
+  `-b`, `--batch_size`: batch Size for model training <br>
+  `-e`, `--epochs`: Epochs for Model Training
+
+</details>
+
+**Example:**
+```
+cd Liveness
+python3 train.py --dataset data --batch_size 8 --epochs 50
+```
+
+### Inference
+Inference your Custom Liveness Model
+
+<details>
+  <summary>Args</summary>
+  
+  `-m`, `--model`: path to trained Liveness model <br>
+  `-i`, `--source`: source - Video path or camera-id <br>
+  `-c`, `--conf`: min prediction conf (0<conf<1)
+
+</details>
+
+**Example:**
+```
+cd Liveness
+python3 inference.py --source 0 --conf 0.8
 ```
 **To Exit Window - Press Q-Key**

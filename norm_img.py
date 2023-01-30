@@ -9,7 +9,7 @@ from mtcnn import MTCNN
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--dataset", type=str, required=True,
                 help="path to dataset/dir")
-ap.add_argument("-o", "--save", type=str, required=True,
+ap.add_argument("-o", "--save", type=str, default='Norm',
                 help="path to save dir")
 
 
@@ -18,13 +18,14 @@ path_to_dir = args["dataset"]
 path_to_save = args['save']
 
 Flage = True
-
 detector = MTCNN()
 
 # Checking that, Already All Data Normalized or NOT
 # It will only Normalize, NOT normalized Data
 # If NOT It will create new save Dir
 class_list_update = []
+class_list_dir = []
+class_list_save = []
 if os.path.exists(path_to_save):
     class_list_save = os.listdir(path_to_save)
     class_list_dir = os.listdir(path_to_dir)
@@ -33,10 +34,13 @@ else:
     os.makedirs(path_to_save)
 
 if len(class_list_update) == 0:
-    if (set(class_list_dir) == set(class_list_save)):
-        Flage = False
-    else:
+    if len(class_list_dir) == 0 and len(class_list_save) == 0:
         class_list = os.listdir(path_to_dir)
+    else:
+        if (set(class_list_dir) == set(class_list_save)):
+            Flage = False
+        else:
+            Flage = True
 else:
     class_list = class_list_update
 
