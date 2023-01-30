@@ -8,7 +8,7 @@ FaceRecognition with MTCNN using ArcFace
 ## 🚀 New Update (27-01-2023)
 - ### Liveness Model:
   - Liveness detector capable of spotting fake faces and performing anti-face spoofing in face recognition systems
-  - Our FaceRecognition system initaly will check the faces are Fake or NOT
+  - Our FaceRecognition system initially will check the faces are **Fake** or **NOT**
   - If its a Fake face it will give warnings
   - Otherwise it will go for Face-Recognition
 
@@ -24,12 +24,12 @@ pip3 install -r requirement.txt
 ```
 
 # Custom Face Recognition
-You can use:<br> **Command Line<br> OR<br> Streamlit** Dashboard
+You can use:<br>
+- ### Command Line <br>
+- ### Streamlit Dashboard
+
 ## Streamlit Dashboard
-### Install Streamlit
-```
-pip3 install streamlit
-```
+⚠️ New version NOT Available, Not updated **Liveness Model**
 ### RUN Streamlit
 ```
 streamlit run app.py
@@ -150,5 +150,67 @@ python3 inference.py --source test/video.mp4 --model models/model.h5 --conf 0.85
 # Webcam
 python3 inference.py --source 0 --model models/model.h5 --conf 0.85 \
                      --liveness_model models/liveness.model --label_encoder models/le.pickle
+```
+**To Exit Window - Press Q-Key**
+
+## 🚀 Liveness Model
+Liveness detector capable of spotting fake faces and performing anti-face spoofing in face recognition systems <br>
+If you wants to create a custom **Liveness model**,
+Follow the instruction below 👇:
+
+### Data Collection
+Collect Positive and Negative data using data.py
+
+<details>
+  <summary>Args</summary>
+  
+  `-i`, `--source`: source - Video path or camera-id <br>
+  `-n`, `--name`: poitive or negative
+
+</details>
+
+**Example:**
+```
+cd Liveness
+python3 data.py --source 0 --name positive  # for positive
+python3 data.py --source 0 --name negative  # for negative
+```
+
+### Train Liveness Model
+Train Liveness model using collected positive and negative data
+
+<details>
+  <summary>Args</summary>
+  
+  `-d`, `--dataset`: path to input dataset <br>
+  `-p`, `--plot`: path to output loss/accuracy plot <br>
+  `-lr`, `--learnig_rate`: Learnig Rate for the Model Training <br>
+  `-b`, `--batch_size`: batch Size for model training <br>
+  `-e`, `--epochs`: Epochs for Model Training
+
+</details>
+
+**Example:**
+```
+cd Liveness
+python3 train.py --dataset data --batch_size 8 --epochs 50
+```
+
+### Inference
+Inference your Custom Liveness Model
+
+<details>
+  <summary>Args</summary>
+  
+  `-m`, `--model`: path to trained Liveness model <br>
+  `-i`, `--source`: source - Video path or camera-id <br>
+  `-c`, `--conf`: min prediction conf (0<conf<1)
+
+</details>
+
+**Example:**
+```
+cd Liveness
+python3 inference.py --source 0 --conf 0.8
 ```
 **To Exit Window - Press Q-Key**
